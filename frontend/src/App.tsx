@@ -88,7 +88,7 @@ function App() {
         <div className="flex-1 flex overflow-hidden">
           {/* Left Sidebar - Desktop */}
           <div
-            className={`hidden lg:flex flex-none transition-all duration-300 ease-in-out ${
+            className={`hidden lg:block flex-none transition-all duration-300 ease-in-out ${
               leftSidebarCollapsed ? 'w-20' : 'w-sidebar'
             }`}
           >
@@ -96,7 +96,7 @@ function App() {
               <Sidebar collapsed={leftSidebarCollapsed} />
               <button
                 onClick={() => setLeftSidebarCollapsed(!leftSidebarCollapsed)}
-                className="absolute -right-3 top-1/2 transform -translate-y-1/2 p-1.5 bg-dracula-current border border-dracula-comment rounded-full text-dracula-comment hover:text-dracula-cyan shadow-lg"
+                className="absolute -right-3 top-1/2 transform -translate-y-1/2 p-1.5 bg-dracula-current border border-dracula-comment rounded-full text-dracula-comment hover:text-dracula-cyan shadow-lg z-10"
               >
                 {leftSidebarCollapsed ? (
                   <ChevronDoubleRightIcon className="h-4 w-4" />
@@ -136,7 +136,7 @@ function App() {
 
           {/* Right Sidebar (Chat History) - Desktop */}
           <div
-            className={`hidden lg:flex flex-none transition-all duration-300 ease-in-out ${
+            className={`hidden lg:block flex-none transition-all duration-300 ease-in-out ${
               rightSidebarCollapsed ? 'w-20' : 'w-sidebar'
             }`}
           >

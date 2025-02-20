@@ -124,7 +124,7 @@ export function ChatHistory({
                   <div className="absolute right-1 sm:right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                     <button
                       onClick={(e) => handleEditClick(chat, e)}
-                      className="p-1 rounded-full transition-colors text-dracula-comment hover:text-dracula-cyan hover:bg-dracula-background opacity-0 group-hover:opacity-100"
+                      className="p-1 rounded-full transition-colors text-dracula-comment hover:text-dracula-cyan hover:bg-dracula-background lg:opacity-0 lg:group-hover:opacity-100"
                       title="Rename chat"
                     >
                       <PencilIcon className="h-4 w-4 sm:h-5 sm:w-5" />
@@ -134,7 +134,7 @@ export function ChatHistory({
                         e.stopPropagation();
                         onDeleteChat(chat.id);
                       }}
-                      className="p-1 rounded-full transition-colors text-dracula-comment hover:text-dracula-red hover:bg-dracula-background opacity-0 group-hover:opacity-100"
+                      className="p-1 rounded-full transition-colors text-dracula-comment hover:text-dracula-red hover:bg-dracula-background lg:opacity-0 lg:group-hover:opacity-100"
                       title="Delete chat"
                     >
                       <TrashIcon className="h-4 w-4 sm:h-5 sm:w-5" />
