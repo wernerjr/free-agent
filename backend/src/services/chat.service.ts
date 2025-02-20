@@ -120,18 +120,16 @@ ${message}
       'microsoft/phi-2': {
         ...baseConfig,
         parameters: {
-          ...baseConfig.parameters,
-          max_new_tokens: Math.min(512, max_new_tokens),
-          temperature: 0.8,
+          max_new_tokens: 256,
+          temperature: 0.7,
           top_p: 0.9,
-          repetition_penalty: 1.2
+          repetition_penalty: 1.1,
+          return_full_text: false
         },
-        inputs: `Human: You are a helpful AI assistant. Be concise and clear in your responses.
+        inputs: `Assistant: I am a helpful AI assistant. I provide clear and concise responses.
 
-${truncatedHistory ? `Chat history:
-${truncatedHistory}
-
-` : ''}Question: ${message}`
+${truncatedHistory ? truncatedHistory.split('\n').slice(-10).join('\n') + '\n\n' : ''}Human: ${message}
+Assistant:`
       }
     };
 
