@@ -7,10 +7,13 @@ import { v4 as uuidv4 } from 'uuid';
 import iconv from 'iconv-lite';
 import fs from 'fs';
 import path from 'path';
+import dotenv from 'dotenv';
 
-const MODEL_NAME = 'mistralai/Mistral-7B-Instruct-v0.2';
+// Load environment variables
+dotenv.config();
+
 const app = express();
-const port = 8000;
+const port = process.env.PORT ? parseInt(process.env.PORT) : 8000;
 
 // Configurar o multer para lidar com nomes de arquivo em UTF-8
 const upload = multer({
@@ -113,7 +116,7 @@ const documents: StoredDocument[] = loadDocuments();
 const chats: Chat[] = loadChats();
 
 app.use(cors({
-  origin: 'http://localhost:5173',
+  origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
   credentials: true
 }));
 app.use(express.json());
@@ -432,4 +435,5 @@ function formatFileSize(bytes: number): string {
 
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
+  console.log(`CORS enabled for origin: ${process.env.CORS_ORIGIN || 'http://localhost:5173'}`);
 }); 
