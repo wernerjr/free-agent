@@ -15,10 +15,18 @@ function App() {
   const [rightSidebarCollapsed, setRightSidebarCollapsed] = useState(false);
   const [chats, setChats] = useState<Omit<ChatType, 'messages'>[]>([]);
   const [currentChatId, setCurrentChatId] = useState<string>();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileChatHistoryOpen, setIsMobileChatHistoryOpen] = useState(false);
 
   useEffect(() => {
     fetchChats();
   }, []);
+
+  // Fecha os menus móveis quando mudar de rota
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+    setIsMobileChatHistoryOpen(false);
+  }, [location.pathname]);
 
   const fetchChats = async () => {
     try {
@@ -41,6 +49,7 @@ function App() {
       const newChat = response.data.data.chat;
       setChats(prev => [newChat, ...prev]);
       setCurrentChatId(newChat.id);
+      setIsMobileChatHistoryOpen(false);
     } catch (err) {
       console.error('Error creating new chat:', err);
     }
@@ -65,13 +74,21 @@ function App() {
         {/* Main Header */}
         <Header 
           title="Free Agent"
+          leftControl={
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="lg:hidden p-2 text-dracula-comment hover:text-dracula-cyan"
+            >
+              <Bars3Icon className="h-6 w-6" />
+            </button>
+          }
         />
 
         {/* Main Content Area */}
         <div className="flex-1 flex overflow-hidden">
-          {/* Left Sidebar */}
+          {/* Left Sidebar - Desktop */}
           <div
-            className={`flex-none transition-all duration-300 ease-in-out ${
+            className={`hidden lg:flex flex-none transition-all duration-300 ease-in-out ${
               leftSidebarCollapsed ? 'w-20' : 'w-sidebar'
             }`}
           >
@@ -90,18 +107,36 @@ function App() {
             </div>
           </div>
 
+          {/* Left Sidebar - Mobile */}
+          <div
+            className={`fixed inset-0 z-40 lg:hidden ${
+              isMobileMenuOpen ? 'block' : 'hidden'
+            }`}
+          >
+            <div className="fixed inset-0 bg-black/50" onClick={() => setIsMobileMenuOpen(false)} />
+            <div className="fixed inset-y-0 left-0 w-sidebar bg-dracula-current">
+              <Sidebar collapsed={false} />
+            </div>
+          </div>
+
           {/* Main Content */}
-          <div className="flex-1 flex overflow-hidden">
+          <div className="flex-1 flex overflow-hidden relative">
             <Routes>
-              <Route path="/" element={<Chat currentChatId={currentChatId} onChatUpdated={fetchChats} />} />
+              <Route path="/" element={
+                <Chat 
+                  currentChatId={currentChatId} 
+                  onChatUpdated={fetchChats}
+                  onOpenChatHistory={() => setIsMobileChatHistoryOpen(true)}
+                />
+              } />
               <Route path="/documents" element={<Documents />} />
               <Route path="/settings" element={<Settings />} />
             </Routes>
           </div>
 
-          {/* Right Sidebar (Chat History) */}
+          {/* Right Sidebar (Chat History) - Desktop */}
           <div
-            className={`flex-none transition-all duration-300 ease-in-out ${
+            className={`hidden lg:flex flex-none transition-all duration-300 ease-in-out ${
               rightSidebarCollapsed ? 'w-20' : 'w-sidebar'
             }`}
           >
@@ -109,7 +144,10 @@ function App() {
               <ChatHistory 
                 chats={chats}
                 currentChatId={currentChatId}
-                onSelectChat={setCurrentChatId}
+                onSelectChat={(id) => {
+                  setCurrentChatId(id);
+                  setIsMobileChatHistoryOpen(false);
+                }}
                 onDeleteChat={handleDeleteChat}
                 onNewChat={handleNewChat}
                 onChatUpdated={fetchChats}
@@ -125,6 +163,29 @@ function App() {
                   <ChevronDoubleRightIcon className="h-4 w-4" />
                 )}
               </button>
+            </div>
+          </div>
+
+          {/* Right Sidebar (Chat History) - Mobile */}
+          <div
+            className={`fixed inset-0 z-40 lg:hidden ${
+              isMobileChatHistoryOpen ? 'block' : 'hidden'
+            }`}
+          >
+            <div className="fixed inset-0 bg-black/50" onClick={() => setIsMobileChatHistoryOpen(false)} />
+            <div className="fixed inset-y-0 right-0 w-sidebar bg-dracula-current">
+              <ChatHistory 
+                chats={chats}
+                currentChatId={currentChatId}
+                onSelectChat={(id) => {
+                  setCurrentChatId(id);
+                  setIsMobileChatHistoryOpen(false);
+                }}
+                onDeleteChat={handleDeleteChat}
+                onNewChat={handleNewChat}
+                onChatUpdated={fetchChats}
+                collapsed={false}
+              />
             </div>
           </div>
         </div>

@@ -62,21 +62,21 @@ export function Documents() {
   };
 
   return (
-    <div className="flex-auto p-6 overflow-y-auto bg-dracula-background">
+    <div className="flex-auto p-3 sm:p-6 overflow-y-auto bg-dracula-background">
       <div className="max-w-screen-xl mx-auto">
         {isLoading ? (
           <div className="flex justify-center items-center h-32">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-dracula-purple"></div>
+            <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-dracula-purple"></div>
           </div>
         ) : error ? (
-          <div className="bg-dracula-background border border-dracula-red/20 text-dracula-red rounded-lg p-4">
+          <div className="bg-dracula-background border border-dracula-red/20 text-dracula-red rounded-lg p-3 sm:p-4 text-sm sm:text-base">
             {error}
           </div>
         ) : documents.length === 0 ? (
-          <div className="text-center py-12">
-            <DocumentIcon className="mx-auto h-12 w-12 text-dracula-comment" />
-            <h3 className="mt-2 text-sm font-medium text-dracula-foreground">No documents</h3>
-            <p className="mt-1 text-sm text-dracula-comment">
+          <div className="text-center py-8 sm:py-12">
+            <DocumentIcon className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-dracula-comment" />
+            <h3 className="mt-2 text-sm sm:text-base font-medium text-dracula-foreground">No documents</h3>
+            <p className="mt-1 text-xs sm:text-sm text-dracula-comment">
               Documents uploaded in chat will appear here
             </p>
           </div>
@@ -84,26 +84,26 @@ export function Documents() {
           <div className="bg-dracula-current shadow-lg rounded-lg overflow-hidden">
             <ul className="divide-y divide-dracula-comment/20">
               {documents.map((doc) => (
-                <li key={doc.id} className="p-4 hover:bg-dracula-background transition-colors">
+                <li key={doc.id} className="p-3 sm:p-4 hover:bg-dracula-background transition-colors">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center min-w-0">
-                      <DocumentIcon className="h-8 w-8 text-dracula-cyan" />
-                      <div className="ml-4 min-w-0">
-                        <p className="text-sm font-medium text-dracula-foreground truncate">
+                      <DocumentIcon className="h-6 w-6 sm:h-8 sm:w-8 text-dracula-cyan" />
+                      <div className="ml-3 sm:ml-4 min-w-0">
+                        <p className="text-sm sm:text-base font-medium text-dracula-foreground truncate">
                           {doc.name}
                         </p>
-                        <div className="flex items-center text-sm text-dracula-comment">
+                        <div className="flex flex-wrap items-center text-xs sm:text-sm text-dracula-comment gap-2">
                           <span>{formatFileSize(doc.size)}</span>
-                          <span className="mx-2">•</span>
+                          <span className="hidden sm:inline">•</span>
                           <span>{formatDate(doc.uploadedAt)}</span>
                         </div>
                       </div>
                     </div>
                     <button
                       onClick={() => handleDelete(doc.id)}
-                      className="ml-4 p-2 text-dracula-comment hover:text-dracula-red rounded-full hover:bg-dracula-background transition-colors"
+                      className="ml-3 sm:ml-4 p-2 text-dracula-comment hover:text-dracula-red rounded-full hover:bg-dracula-background transition-colors"
                     >
-                      <TrashIcon className="h-5 w-5" />
+                      <TrashIcon className="h-4 w-4 sm:h-5 sm:w-5" />
                     </button>
                   </div>
                 </li>

@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { PaperAirplaneIcon, PaperClipIcon } from '@heroicons/react/24/outline';
+import { PaperAirplaneIcon, PaperClipIcon, ChatBubbleLeftIcon } from '@heroicons/react/24/outline';
 import axios from 'axios';
 import type { Message, ChatResponse, DocumentResponse } from '../types';
 import ReactMarkdown from 'react-markdown';
@@ -9,6 +9,7 @@ import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 export interface ChatProps {
   currentChatId?: string;
   onChatUpdated?: () => void;
+  onOpenChatHistory?: () => void;
 }
 
 interface Model {
@@ -38,7 +39,7 @@ function Toast({ message, type, onClose }: { message: string; type: 'success' | 
   );
 }
 
-export function Chat({ currentChatId, onChatUpdated }: ChatProps) {
+export function Chat({ currentChatId, onChatUpdated, onOpenChatHistory }: ChatProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -261,7 +262,7 @@ export function Chat({ currentChatId, onChatUpdated }: ChatProps) {
         />
       )}
       {/* Messages Area */}
-      <div className="flex-auto overflow-y-auto px-6 py-4">
+      <div className="flex-auto overflow-y-auto px-3 sm:px-6 py-4">
         <div className="max-w-screen-xl mx-auto space-y-4">
           {messages.map((message, index) => (
             <div
@@ -271,20 +272,17 @@ export function Chat({ currentChatId, onChatUpdated }: ChatProps) {
               }`}
             >
               <div
-                className={`rounded-lg px-4 py-2 shadow-lg max-w-[80%] ${
+                className={`rounded-lg px-3 sm:px-4 py-2 shadow-lg max-w-[85%] sm:max-w-[80%] ${
                   message.role === 'user'
                     ? 'bg-dracula-purple text-dracula-foreground'
                     : 'bg-dracula-current text-dracula-foreground'
                 } ${message.role === 'assistant' ? 'prose prose-dracula max-w-none' : ''}`}
               >
                 {message.role === 'assistant' && message.model && (
-                  <div className="flex items-center gap-2 mb-2 text-sm text-dracula-comment">
-                    <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center gap-2 mb-2 text-sm text-dracula-comment">
+                    <div className="flex flex-wrap items-center gap-2">
                       <span className="px-2 py-0.5 bg-dracula-background rounded-full text-xs">
-                        {models.find(m => m.id === message.model)?.name || 'Unknown Model'}
-                        {models.find(m => m.id === message.model)?.isPro && (
-                          <span className="ml-1 text-dracula-purple">(Pro)</span>
-                        )}
+                        Mistral 7B
                       </span>
                       {message.responseTime && (
                         <span className="px-2 py-0.5 bg-dracula-background rounded-full text-xs flex items-center gap-1">
@@ -300,7 +298,7 @@ export function Chat({ currentChatId, onChatUpdated }: ChatProps) {
                 )}
                 {message.role === 'assistant' ? (
                   <ReactMarkdown
-                    className="prose prose-dracula max-w-none prose-pre:bg-dracula-background prose-pre:text-dracula-foreground"
+                    className="prose prose-dracula max-w-none prose-pre:bg-dracula-background prose-pre:text-dracula-foreground prose-sm sm:prose-base"
                     components={{
                       code({className, children, ...props}: any) {
                         const match = /language-(\w+)/.exec(className || '');
@@ -313,7 +311,7 @@ export function Chat({ currentChatId, onChatUpdated }: ChatProps) {
                               style={vscDarkPlus}
                               language={match[1]}
                               PreTag="div"
-                              className="!my-0 !bg-transparent"
+                              className="!my-0 !bg-transparent text-sm"
                               showLineNumbers={true}
                               {...props}
                             >
@@ -321,7 +319,7 @@ export function Chat({ currentChatId, onChatUpdated }: ChatProps) {
                             </SyntaxHighlighter>
                           </div>
                         ) : (
-                          <code className={`${className} bg-dracula-background text-dracula-green rounded px-1`} {...props}>
+                          <code className={`${className} bg-dracula-background text-dracula-green rounded px-1 text-sm`} {...props}>
                             {children}
                           </code>
                         );
@@ -359,7 +357,7 @@ export function Chat({ currentChatId, onChatUpdated }: ChatProps) {
       </div>
 
       {/* Input Area */}
-      <div className="flex-none border-t border-dracula-comment/20 px-6 py-4 bg-dracula-current">
+      <div className="flex-none border-t border-dracula-comment/20 px-3 sm:px-6 py-4 bg-dracula-current">
         <div className="max-w-screen-xl mx-auto">
           <form onSubmit={handleSubmit} className="flex items-center gap-2">
             <input
@@ -376,22 +374,31 @@ export function Chat({ currentChatId, onChatUpdated }: ChatProps) {
               aria-label="Attach file"
               disabled={!currentChatId}
             >
-              <PaperClipIcon className="h-6 w-6" />
+              <PaperClipIcon className="h-5 w-5 sm:h-6 sm:w-6" />
             </button>
 
             {/* Model Info */}
-            <div className="flex-none px-3 py-2 bg-dracula-background border border-dracula-comment/20 rounded-lg text-dracula-foreground">
+            <div className="hidden sm:flex flex-none px-3 py-2 bg-dracula-background border border-dracula-comment/20 rounded-lg text-dracula-foreground">
               <div className="flex items-center gap-2">
                 <span className="text-sm">Mistral 7B</span>
               </div>
             </div>
+
+            {/* Chat History Button - Mobile */}
+            <button
+              type="button"
+              onClick={onOpenChatHistory}
+              className="lg:hidden flex-none p-2 text-dracula-comment hover:text-dracula-cyan hover:bg-dracula-background rounded-full transition-colors"
+            >
+              <ChatBubbleLeftIcon className="h-5 w-5 sm:h-6 sm:w-6" />
+            </button>
 
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder={currentChatId ? "Type your message..." : "Select or create a chat to start messaging"}
-              className="flex-auto min-w-0 px-4 py-2 bg-dracula-background border border-dracula-comment/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-dracula-purple focus:border-transparent text-dracula-foreground placeholder-dracula-comment"
+              className="flex-auto min-w-0 px-3 sm:px-4 py-2 bg-dracula-background border border-dracula-comment/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-dracula-purple focus:border-transparent text-dracula-foreground placeholder-dracula-comment text-sm sm:text-base"
               disabled={isLoading || !currentChatId}
             />
             <button
@@ -400,7 +407,7 @@ export function Chat({ currentChatId, onChatUpdated }: ChatProps) {
               disabled={isLoading || !input.trim() || !currentChatId}
               aria-label="Send message"
             >
-              <PaperAirplaneIcon className="h-6 w-6" />
+              <PaperAirplaneIcon className="h-5 w-5 sm:h-6 sm:w-6" />
             </button>
           </form>
         </div>
