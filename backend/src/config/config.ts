@@ -6,10 +6,10 @@ import { SERVER_CONFIG } from './server';
 export class ConfigManager {
   private static instance: ConfigManager;
   private config: Config;
-  private apiKey: string = '';
-  private model: string = 'mistralai/Mistral-7B-Instruct-v0.2';
+  private configPath: string;
 
   private constructor() {
+    this.configPath = SERVER_CONFIG.dataPath.config;
     this.config = this.loadConfig();
   }
 
@@ -22,35 +22,43 @@ export class ConfigManager {
 
   private loadConfig(): Config {
     try {
-      if (fs.existsSync(SERVER_CONFIG.dataPath.config)) {
-        const data = fs.readFileSync(SERVER_CONFIG.dataPath.config, 'utf8');
+      // Ensure directory exists
+      const configDir = path.dirname(this.configPath);
+      if (!fs.existsSync(configDir)) {
+        fs.mkdirSync(configDir, { recursive: true });
+      }
+
+      // Load or create default config
+      if (fs.existsSync(this.configPath)) {
+        const data = fs.readFileSync(this.configPath, 'utf8');
         const loadedConfig = JSON.parse(data);
-        this.config = {
-          apiKey: loadedConfig.apiKey,
-          model: loadedConfig.model || this.model
+        return {
+          apiKey: loadedConfig.apiKey || '',
+          model: loadedConfig.model || 'mistralai/Mistral-7B-Instruct-v0.2'
         };
-        if (this.config.apiKey) {
-          this.apiKey = this.config.apiKey;
-        }
-        if (this.config.model) {
-          this.model = this.config.model;
-        }
-        return this.config;
       }
     } catch (error) {
       console.error('Error loading config:', error);
     }
-    this.config = { model: this.model };
-    return this.config;
+
+    // Return default config if loading fails
+    return {
+      apiKey: '',
+      model: 'mistralai/Mistral-7B-Instruct-v0.2'
+    };
   }
 
   private saveConfig(): void {
     try {
-      const configDir = path.dirname(SERVER_CONFIG.dataPath.config);
+      const configDir = path.dirname(this.configPath);
       if (!fs.existsSync(configDir)) {
         fs.mkdirSync(configDir, { recursive: true });
       }
-      fs.writeFileSync(SERVER_CONFIG.dataPath.config, JSON.stringify(this.config, null, 2));
+      fs.writeFileSync(this.configPath, JSON.stringify(this.config, null, 2));
+      console.log('Config saved successfully:', {
+        hasApiKey: !!this.config.apiKey,
+        model: this.config.model
+      });
     } catch (error) {
       console.error('Error saving config:', error);
       throw error;
@@ -58,21 +66,19 @@ export class ConfigManager {
   }
 
   public getApiKey(): string {
-    return this.apiKey;
+    return this.config.apiKey || '';
   }
 
   public setApiKey(key: string): void {
-    this.apiKey = key;
     this.config.apiKey = key;
     this.saveConfig();
   }
 
   public getModel(): string {
-    return this.model;
+    return this.config.model || 'mistralai/Mistral-7B-Instruct-v0.2';
   }
 
   public setModel(model: string): void {
-    this.model = model;
     this.config.model = model;
     this.saveConfig();
   }

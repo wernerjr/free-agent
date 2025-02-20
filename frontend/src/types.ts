@@ -2,6 +2,8 @@ export interface Message {
   role: 'user' | 'assistant' | 'system';
   content: string;
   timestamp?: Date;
+  model?: string;
+  responseTime?: number;  // tempo em milissegundos
 }
 
 export interface ChatResponse {

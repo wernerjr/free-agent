@@ -11,6 +11,8 @@ export interface ChatMessage {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  model?: string;
+  responseTime?: number;  // tempo em milissegundos
 }
 
 export interface Chat {

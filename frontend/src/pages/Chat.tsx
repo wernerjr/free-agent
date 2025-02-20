@@ -11,6 +11,13 @@ export interface ChatProps {
   onChatUpdated?: () => void;
 }
 
+interface Model {
+  id: string;
+  name: string;
+  description: string;
+  isPro: boolean;
+}
+
 // Toast component
 function Toast({ message, type, onClose }: { message: string; type: 'success' | 'error'; onClose: () => void }) {
   useEffect(() => {
@@ -36,9 +43,15 @@ export function Chat({ currentChatId, onChatUpdated }: ChatProps) {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [models, setModels] = useState<Model[]>([]);
+  const [currentModel, setCurrentModel] = useState('');
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    fetchModels();
+  }, []);
 
   useEffect(() => {
     if (currentChatId) {
@@ -47,6 +60,34 @@ export function Chat({ currentChatId, onChatUpdated }: ChatProps) {
       setMessages([]);
     }
   }, [currentChatId]);
+
+  const fetchModels = async () => {
+    try {
+      const response = await axios.get('http://localhost:8000/config/models');
+      setModels(response.data.data.models);
+      setCurrentModel(response.data.data.currentModel);
+    } catch (err) {
+      console.error('Error fetching models:', err);
+      setError('Failed to fetch models');
+    }
+  };
+
+  const handleModelChange = async (modelId: string) => {
+    try {
+      await axios.post('http://localhost:8000/config/model', { model: modelId });
+      setCurrentModel(modelId);
+      setToast({
+        message: 'Model updated successfully',
+        type: 'success'
+      });
+    } catch (err) {
+      console.error('Error updating model:', err);
+      setToast({
+        message: 'Failed to update model',
+        type: 'error'
+      });
+    }
+  };
 
   const fetchMessages = async () => {
     if (!currentChatId) return;
@@ -94,7 +135,8 @@ export function Chat({ currentChatId, onChatUpdated }: ChatProps) {
       const tempMessage: Message = {
         role: 'assistant',
         content: '',
-        timestamp: new Date()
+        timestamp: new Date(),
+        model: currentModel
       };
       setMessages(prev => [...prev, tempMessage]);
 
@@ -234,6 +276,27 @@ export function Chat({ currentChatId, onChatUpdated }: ChatProps) {
                     : 'bg-dracula-current text-dracula-foreground'
                 } ${message.role === 'assistant' ? 'prose prose-dracula max-w-none' : ''}`}
               >
+                {message.role === 'assistant' && message.model && (
+                  <div className="flex items-center gap-2 mb-2 text-sm text-dracula-comment">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 bg-dracula-background rounded-full text-xs">
+                        {models.find(m => m.id === message.model)?.name || 'Unknown Model'}
+                        {models.find(m => m.id === message.model)?.isPro && (
+                          <span className="ml-1 text-dracula-purple">(Pro)</span>
+                        )}
+                      </span>
+                      {message.responseTime && (
+                        <span className="px-2 py-0.5 bg-dracula-background rounded-full text-xs flex items-center gap-1">
+                          <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 6V12L16 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                            <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2"/>
+                          </svg>
+                          {(message.responseTime / 1000).toFixed(1)}s
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                )}
                 {message.role === 'assistant' ? (
                   <ReactMarkdown
                     className="prose prose-dracula max-w-none prose-pre:bg-dracula-background prose-pre:text-dracula-foreground"
@@ -314,6 +377,21 @@ export function Chat({ currentChatId, onChatUpdated }: ChatProps) {
             >
               <PaperClipIcon className="h-6 w-6" />
             </button>
+
+            {/* Model Selector */}
+            <select
+              value={currentModel}
+              onChange={(e) => handleModelChange(e.target.value)}
+              className="flex-none w-48 px-3 py-2 bg-dracula-background border border-dracula-comment/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-dracula-purple focus:border-transparent text-dracula-foreground"
+              disabled={isLoading}
+            >
+              {models.map((model) => (
+                <option key={model.id} value={model.id}>
+                  {model.name} {model.isPro ? '(Pro)' : ''}
+                </option>
+              ))}
+            </select>
+
             <input
               type="text"
               value={input}

@@ -106,25 +106,74 @@ export class ChatService {
     writer: WritableStreamDefaultWriter
   ): Promise<void> {
     const encoder = new TextEncoder();
+    const startTime = Date.now();
     try {
       const hf = new HfInference(this.configManager.getApiKey());
-      const response = await hf.textGeneration({
-        model: this.configManager.getModel(),
-        inputs: message,
-        parameters: {
-          max_new_tokens: 1024,
-          temperature: 0.7,
-          top_p: 0.95,
-          repetition_penalty: 1.1,
+      const modelId = this.configManager.getModel();
+
+      // Model-specific configurations
+      const modelConfigs: Record<string, any> = {
+        'mistralai/Mistral-7B-Instruct-v0.2': {
+          parameters: {
+            max_new_tokens: 1024,
+            temperature: 0.7,
+            top_p: 0.95,
+            repetition_penalty: 1.1,
+            return_full_text: false
+          },
+          inputs: `<|prompter|>${message}<|assistant|>`
+        },
+        'meta-llama/Llama-2-70b-chat-hf': {
+          parameters: {
+            max_new_tokens: 1024,
+            temperature: 0.7,
+            top_p: 0.95,
+            repetition_penalty: 1.1,
+            return_full_text: false
+          },
+          inputs: `[INST] ${message} [/INST]`
+        },
+        'mistralai/Mixtral-8x7B-Instruct-v0.1': {
+          parameters: {
+            max_new_tokens: 1024,
+            temperature: 0.7,
+            top_p: 0.95,
+            repetition_penalty: 1.1,
+            return_full_text: false
+          },
+          inputs: `<|im_start|>user\n${message}<|im_end|>\n<|im_start|>assistant`
+        },
+        'microsoft/phi-2': {
+          parameters: {
+            max_new_tokens: 1024,
+            temperature: 0.7,
+            top_p: 0.95,
+            repetition_penalty: 1.1,
+            return_full_text: false
+          },
+          inputs: `You are a helpful AI assistant. When providing code examples, always use markdown code blocks with the appropriate language tag.
+
+Instructions: ${message}
+
+Response (remember to use markdown code blocks for any code):
+`
         }
+      };
+
+      // Check if model is supported
+      if (!modelConfigs[modelId]) {
+        throw new Error(`Model ${modelId} is not supported`);
+      }
+
+      const config = modelConfigs[modelId];
+      const response = await hf.textGeneration({
+        model: modelId,
+        inputs: config.inputs,
+        parameters: config.parameters
       });
 
+      const responseTime = Date.now() - startTime;
       let aiResponse = response.generated_text;
-      
-      // Remove user message from response if present
-      if (aiResponse.startsWith(message)) {
-        aiResponse = aiResponse.substring(message.length).trim();
-      }
       
       // Stream response word by word
       const words = aiResponse.split(' ').filter(word => word.length > 0);
@@ -137,7 +186,9 @@ export class ChatService {
       const finalMessage: ChatMessage = {
         role: 'assistant',
         content: aiResponse,
-        timestamp: new Date()
+        timestamp: new Date(),
+        model: modelId,
+        responseTime
       };
 
       chat.messages.push(finalMessage);

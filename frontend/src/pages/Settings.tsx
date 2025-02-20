@@ -5,6 +5,7 @@ interface Model {
   id: string;
   name: string;
   description: string;
+  isPro: boolean;
 }
 
 export function Settings() {
@@ -154,15 +155,26 @@ export function Settings() {
                     }`}
                     onClick={() => handleModelChange(model.id)}
                   >
-                    <div className="flex items-center space-x-2">
-                      <div className={`w-4 h-4 rounded-full border-2 ${
-                        model.id === currentModel
-                          ? 'border-dracula-purple bg-dracula-purple'
-                          : 'border-dracula-comment'
-                      }`} />
-                      <h3 className="text-lg font-medium text-dracula-foreground">{model.name}</h3>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-2">
+                        <div className={`w-4 h-4 rounded-full border-2 ${
+                          model.id === currentModel
+                            ? 'border-dracula-purple bg-dracula-purple'
+                            : 'border-dracula-comment'
+                        }`} />
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-lg font-medium text-dracula-foreground">{model.name}</h3>
+                            {model.isPro && (
+                              <span className="px-2 py-0.5 text-xs font-semibold bg-dracula-purple/20 text-dracula-purple rounded-full">
+                                PRO
+                              </span>
+                            )}
+                          </div>
+                          <p className="mt-2 text-sm text-dracula-comment">{model.description}</p>
+                        </div>
+                      </div>
                     </div>
-                    <p className="mt-2 text-sm text-dracula-comment">{model.description}</p>
                   </div>
                 ))
               )}
