@@ -132,52 +132,17 @@ export function Settings() {
             </form>
           </section>
 
-          {/* Model Selection Section */}
+          {/* Model Info Section */}
           <section>
-            <h2 className="text-xl font-semibold text-dracula-pink mb-6">Model Selection</h2>
-            <div className="space-y-4">
-              {isLoading ? (
-                <div className="flex justify-center items-center py-8">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-dracula-purple"></div>
+            <h2 className="text-xl font-semibold text-dracula-pink mb-6">Model Information</h2>
+            <div className="p-4 rounded-lg border border-dracula-comment/20 bg-dracula-current">
+              <div className="flex items-center space-x-2">
+                <div className="w-4 h-4 rounded-full border-2 border-dracula-purple bg-dracula-purple" />
+                <div>
+                  <h3 className="text-lg font-medium text-dracula-foreground">Mistral 7B</h3>
+                  <p className="mt-2 text-sm text-dracula-comment">A powerful language model for general-purpose chat and instruction following.</p>
                 </div>
-              ) : models.length === 0 ? (
-                <div className="text-center py-8 text-dracula-comment">
-                  No models available
-                </div>
-              ) : (
-                models.map((model) => (
-                  <div
-                    key={model.id}
-                    className={`p-4 rounded-lg border transition-colors cursor-pointer ${
-                      model.id === currentModel
-                        ? 'bg-dracula-current border-dracula-purple'
-                        : 'border-dracula-comment/20 hover:border-dracula-purple'
-                    }`}
-                    onClick={() => handleModelChange(model.id)}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        <div className={`w-4 h-4 rounded-full border-2 ${
-                          model.id === currentModel
-                            ? 'border-dracula-purple bg-dracula-purple'
-                            : 'border-dracula-comment'
-                        }`} />
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h3 className="text-lg font-medium text-dracula-foreground">{model.name}</h3>
-                            {model.isPro && (
-                              <span className="px-2 py-0.5 text-xs font-semibold bg-dracula-purple/20 text-dracula-purple rounded-full">
-                                PRO
-                              </span>
-                            )}
-                          </div>
-                          <p className="mt-2 text-sm text-dracula-comment">{model.description}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
+              </div>
             </div>
           </section>
 

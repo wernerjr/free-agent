@@ -29,14 +29,11 @@ export class ChatService {
 
   private validateModelConfig(modelId: string): void {
     const supportedModels = [
-      'mistralai/Mistral-7B-Instruct-v0.2',
-      'meta-llama/Llama-2-70b-chat-hf',
-      'mistralai/Mixtral-8x7B-Instruct-v0.1',
-      'microsoft/phi-2'
+      'mistralai/Mistral-7B-Instruct-v0.2'
     ] as const;
 
     if (!supportedModels.includes(modelId as any)) {
-      throw new Error(`Model ${modelId} is not supported. Supported models are: ${supportedModels.join(', ')}`);
+      throw new Error(`Model ${modelId} is not supported. Only Mistral 7B is available.`);
     }
   }
 
@@ -59,12 +56,11 @@ export class ChatService {
     const MAX_CONTEXT_LENGTH = 2048;
     
     // Calculate max_new_tokens dynamically
-    // Leave some buffer for special tokens and ensure we don't exceed model limits
     const max_new_tokens = Math.min(
-      1024, // Default maximum
+      1024,
       Math.max(
-        256, // Minimum response length
-        MAX_CONTEXT_LENGTH - estimatedInputTokens - 50 // Buffer for special tokens
+        256,
+        MAX_CONTEXT_LENGTH - estimatedInputTokens - 50
       )
     );
 
@@ -83,57 +79,22 @@ export class ChatService {
       ? conversationHistory.slice(-6000) + "\n[Earlier conversation history truncated]"
       : conversationHistory;
 
-    const configs: Record<string, ModelConfig> = {
-      'mistralai/Mistral-7B-Instruct-v0.2': {
-        ...baseConfig,
-        inputs: `<|system|>You are a helpful AI assistant. Below is the conversation history followed by a new user message. Maintain context and provide relevant responses.
+    return {
+      ...baseConfig,
+      inputs: `<|system|>You are a direct and focused AI assistant. Provide concise responses that directly address the user's question. Maintain the conversation context but avoid unnecessary information. Always respond in the same language as the user's message.
+
+Rules:
+1. Answer only what was asked
+2. Keep responses focused and to the point
+3. Use the chat history for context only when relevant
+4. Match the user's language (English or Portuguese)
+5. No greetings or unnecessary phrases
 
 Previous conversation:
 ${truncatedHistory}
 
 <|prompter|>${message}<|assistant|>`
-      },
-      'meta-llama/Llama-2-70b-chat-hf': {
-        ...baseConfig,
-        inputs: `[INST] <<SYS>>
-You are a helpful AI assistant. Below is the conversation history followed by a new user message. Maintain context and provide relevant responses.
-<</SYS>>
-
-Previous conversation:
-${truncatedHistory}
-
-Current message: ${message} [/INST]`
-      },
-      'mistralai/Mixtral-8x7B-Instruct-v0.1': {
-        ...baseConfig,
-        inputs: `<|im_start|>system
-You are a helpful AI assistant. Below is the conversation history followed by a new user message. Maintain context and provide relevant responses.
-
-Previous conversation:
-${truncatedHistory}
-<|im_end|>
-<|im_start|>user
-${message}
-<|im_end|>
-<|im_start|>assistant`
-      },
-      'microsoft/phi-2': {
-        ...baseConfig,
-        parameters: {
-          max_new_tokens: 256,
-          temperature: 0.7,
-          top_p: 0.9,
-          repetition_penalty: 1.1,
-          return_full_text: false
-        },
-        inputs: `Assistant: I am a helpful AI assistant. I provide clear and concise responses.
-
-${truncatedHistory ? truncatedHistory.split('\n').slice(-10).join('\n') + '\n\n' : ''}Human: ${message}
-Assistant:`
-      }
     };
-
-    return configs[modelId];
   }
 
   public getAllChats(): Omit<Chat, 'messages'>[] {
@@ -229,7 +190,9 @@ Assistant:`
       // Format conversation history
       const conversationHistory = chat.messages.map(msg => {
         const role = msg.role === 'user' ? 'User' : 'Assistant';
-        return `${role}: ${msg.content}`;
+        // Remove prompt markers from the content
+        const content = msg.content.replace(/<\|assistant\|>/g, '').replace(/<\|prompter\|>/g, '').trim();
+        return `${role}: ${content}`;
       }).join('\n\n');
 
       const config = this.getModelConfig(modelId, message, conversationHistory);
@@ -241,7 +204,17 @@ Assistant:`
       });
 
       const responseTime = Date.now() - startTime;
+      // Clean up the response text by removing all tags and prefixes
       let aiResponse = response.generated_text;
+      
+      // First try to extract content between assistant tags
+      const assistantMatch = aiResponse.match(/<\|assistant\|>(.*?)(?:<\|.*?\|>|$)/s);
+      if (assistantMatch) {
+        aiResponse = assistantMatch[1];
+      }
+      
+      // Then clean up any remaining markers or prefixes
+      aiResponse = aiResponse.trim();
       
       try {
         // Stream response word by word

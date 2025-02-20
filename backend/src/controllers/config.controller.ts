@@ -72,24 +72,6 @@ export class ConfigController {
           name: 'Mistral 7B',
           description: 'A powerful language model for general-purpose chat and instruction following.',
           isPro: false
-        },
-        {
-          id: 'meta-llama/Llama-2-70b-chat-hf',
-          name: 'Llama 2 70B',
-          description: 'Meta\'s largest chat model with exceptional performance across various tasks.',
-          isPro: true
-        },
-        {
-          id: 'mistralai/Mixtral-8x7B-Instruct-v0.1',
-          name: 'Mixtral 8x7B',
-          description: 'Advanced mixture-of-experts model with state-of-the-art performance.',
-          isPro: true
-        },
-        {
-          id: 'microsoft/phi-2',
-          name: 'Phi-2',
-          description: 'Compact yet powerful model from Microsoft Research.',
-          isPro: false
         }
       ];
 

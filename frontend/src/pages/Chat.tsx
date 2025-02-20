@@ -379,19 +379,12 @@ export function Chat({ currentChatId, onChatUpdated }: ChatProps) {
               <PaperClipIcon className="h-6 w-6" />
             </button>
 
-            {/* Model Selector */}
-            <select
-              value={currentModel}
-              onChange={(e) => handleModelChange(e.target.value)}
-              className="flex-none w-48 px-3 py-2 bg-dracula-background border border-dracula-comment/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-dracula-purple focus:border-transparent text-dracula-foreground"
-              disabled={isLoading}
-            >
-              {models.map((model) => (
-                <option key={model.id} value={model.id}>
-                  {model.name} {model.isPro ? '(Pro)' : ''}
-                </option>
-              ))}
-            </select>
+            {/* Model Info */}
+            <div className="flex-none px-3 py-2 bg-dracula-background border border-dracula-comment/20 rounded-lg text-dracula-foreground">
+              <div className="flex items-center gap-2">
+                <span className="text-sm">Mistral 7B</span>
+              </div>
+            </div>
 
             <input
               type="text"
