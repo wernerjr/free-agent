@@ -26,12 +26,12 @@ export function Settings() {
         axios.get('http://localhost:8000/config/models')
       ]);
 
-      if (apiKeyResponse.data.apiKey) {
-        setApiKey(apiKeyResponse.data.apiKey);
+      if (apiKeyResponse.data.data?.apiKey) {
+        setApiKey(apiKeyResponse.data.data.apiKey);
       }
       
-      setModels(modelsResponse.data.models);
-      setCurrentModel(modelsResponse.data.currentModel);
+      setModels(modelsResponse.data.data.models);
+      setCurrentModel(modelsResponse.data.data.currentModel);
     } catch (error) {
       console.error('Failed to fetch config:', error);
       setStatus({
@@ -135,27 +135,37 @@ export function Settings() {
           <section>
             <h2 className="text-xl font-semibold text-dracula-pink mb-6">Model Selection</h2>
             <div className="space-y-4">
-              {models.map((model) => (
-                <div
-                  key={model.id}
-                  className={`p-4 rounded-lg border transition-colors cursor-pointer ${
-                    model.id === currentModel
-                      ? 'bg-dracula-current border-dracula-purple'
-                      : 'border-dracula-comment/20 hover:border-dracula-purple'
-                  }`}
-                  onClick={() => handleModelChange(model.id)}
-                >
-                  <div className="flex items-center space-x-2">
-                    <div className={`w-4 h-4 rounded-full border-2 ${
-                      model.id === currentModel
-                        ? 'border-dracula-purple bg-dracula-purple'
-                        : 'border-dracula-comment'
-                    }`} />
-                    <h3 className="text-lg font-medium text-dracula-foreground">{model.name}</h3>
-                  </div>
-                  <p className="mt-2 text-sm text-dracula-comment">{model.description}</p>
+              {isLoading ? (
+                <div className="flex justify-center items-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-dracula-purple"></div>
                 </div>
-              ))}
+              ) : models.length === 0 ? (
+                <div className="text-center py-8 text-dracula-comment">
+                  No models available
+                </div>
+              ) : (
+                models.map((model) => (
+                  <div
+                    key={model.id}
+                    className={`p-4 rounded-lg border transition-colors cursor-pointer ${
+                      model.id === currentModel
+                        ? 'bg-dracula-current border-dracula-purple'
+                        : 'border-dracula-comment/20 hover:border-dracula-purple'
+                    }`}
+                    onClick={() => handleModelChange(model.id)}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <div className={`w-4 h-4 rounded-full border-2 ${
+                        model.id === currentModel
+                          ? 'border-dracula-purple bg-dracula-purple'
+                          : 'border-dracula-comment'
+                      }`} />
+                      <h3 className="text-lg font-medium text-dracula-foreground">{model.name}</h3>
+                    </div>
+                    <p className="mt-2 text-sm text-dracula-comment">{model.description}</p>
+                  </div>
+                ))
+              )}
             </div>
           </section>
 

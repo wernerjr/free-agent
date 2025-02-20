@@ -23,7 +23,7 @@ function App() {
   const fetchChats = async () => {
     try {
       const response = await axios.get('http://localhost:8000/chats');
-      const sortedChats = response.data.chats.sort(
+      const sortedChats = response.data.data.chats.sort(
         (a: ChatType, b: ChatType) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
       );
       setChats(sortedChats);
@@ -37,8 +37,8 @@ function App() {
 
   const handleNewChat = async () => {
     try {
-      const response = await axios.post<{ chat: ChatType }>('http://localhost:8000/chats');
-      const newChat = response.data.chat;
+      const response = await axios.post<{ success: boolean; data: { chat: ChatType } }>('http://localhost:8000/chats');
+      const newChat = response.data.data.chat;
       setChats(prev => [newChat, ...prev]);
       setCurrentChatId(newChat.id);
     } catch (err) {

@@ -17,10 +17,17 @@ export function Documents() {
     setError(null);
     try {
       const response = await axios.get('http://localhost:8000/documents');
-      setDocuments(response.data.documents);
+      const docs = response.data.data?.documents || [];
+      const processedDocs = docs.map((doc: Document) => ({
+        ...doc,
+        name: decodeURIComponent(doc.name),
+        uploadedAt: new Date(doc.uploadedAt)
+      }));
+      setDocuments(Array.isArray(processedDocs) ? processedDocs : []);
     } catch (err) {
       setError('Failed to fetch documents');
       console.error('Error fetching documents:', err);
+      setDocuments([]);
     } finally {
       setIsLoading(false);
     }

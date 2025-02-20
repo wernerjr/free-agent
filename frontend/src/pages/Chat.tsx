@@ -55,10 +55,12 @@ export function Chat({ currentChatId, onChatUpdated }: ChatProps) {
     setError(null);
     try {
       const response = await axios.get(`http://localhost:8000/chats/${currentChatId}`);
-      setMessages(response.data.chat.messages);
+      const messages = response.data.data?.chat?.messages || [];
+      setMessages(Array.isArray(messages) ? messages : []);
     } catch (err) {
       setError('Failed to fetch messages. Please try again.');
       console.error('Error fetching messages:', err);
+      setMessages([]);
     } finally {
       setIsLoading(false);
     }
@@ -100,7 +102,7 @@ export function Chat({ currentChatId, onChatUpdated }: ChatProps) {
 
       // Create EventSource for streaming
       const eventSource = new EventSource(
-        `http://localhost:8000/chat?message=${encodeURIComponent(input)}&chatId=${currentChatId}`
+        `http://localhost:8000/chats/chat?message=${encodeURIComponent(input)}&chatId=${currentChatId}`
       );
       
       eventSource.onmessage = (event) => {
@@ -163,15 +165,20 @@ export function Chat({ currentChatId, onChatUpdated }: ChatProps) {
     if (!file || !currentChatId) return;
 
     const formData = new FormData();
-    formData.append('file', file);
+    // Create a new File object with UTF-8 encoded name
+    const encodedFile = new File([file], file.name, {
+      type: file.type,
+    });
+    formData.append('file', encodedFile);
     formData.append('chatId', currentChatId);
+    formData.append('originalFileName', file.name); // Send original file name separately
 
     setIsLoading(true);
     setError(null);
 
     try {
       const response = await axios.post<DocumentResponse>(
-        'http://localhost:8000/upload',
+        'http://localhost:8000/documents/upload',
         formData,
         {
           headers: {

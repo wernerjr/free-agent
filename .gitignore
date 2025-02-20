@@ -51,16 +51,15 @@ Thumbs.db
 *.swo
 *~
 
-# Project specific - Backend data files
-**/chats.json
-**/documents.json
-**/config.json
-backend/chats.json
-backend/documents.json
-backend/config.json
-/backend/chats.json
-/backend/documents.json
-/backend/config.json
+# Database and Configuration
+/database/
+database/
+/database/*.json
+*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+!tailwind.config.js
 
 # TypeScript
 *.tsbuildinfo

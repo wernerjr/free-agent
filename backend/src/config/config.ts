@@ -1,12 +1,7 @@
 import fs from 'fs';
 import path from 'path';
-
-const CONFIG_FILE = path.join(__dirname, '../config.json');
-
-interface Config {
-  apiKey?: string;
-  model: string;
-}
+import { Config } from '../types';
+import { SERVER_CONFIG } from './server';
 
 export class ConfigManager {
   private static instance: ConfigManager;
@@ -27,8 +22,8 @@ export class ConfigManager {
 
   private loadConfig(): Config {
     try {
-      if (fs.existsSync(CONFIG_FILE)) {
-        const data = fs.readFileSync(CONFIG_FILE, 'utf8');
+      if (fs.existsSync(SERVER_CONFIG.dataPath.config)) {
+        const data = fs.readFileSync(SERVER_CONFIG.dataPath.config, 'utf8');
         const loadedConfig = JSON.parse(data);
         this.config = {
           apiKey: loadedConfig.apiKey,
@@ -51,7 +46,11 @@ export class ConfigManager {
 
   private saveConfig(): void {
     try {
-      fs.writeFileSync(CONFIG_FILE, JSON.stringify(this.config, null, 2));
+      const configDir = path.dirname(SERVER_CONFIG.dataPath.config);
+      if (!fs.existsSync(configDir)) {
+        fs.mkdirSync(configDir, { recursive: true });
+      }
+      fs.writeFileSync(SERVER_CONFIG.dataPath.config, JSON.stringify(this.config, null, 2));
     } catch (error) {
       console.error('Error saving config:', error);
       throw error;

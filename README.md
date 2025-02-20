@@ -29,6 +29,8 @@ A versatile AI chat interface supporting multiple language models, featuring rea
 - 💾 Persistent chat history
 - 📱 Responsive design
 - 🔒 Secure API key management
+- 🌐 UTF-8 support for file names and content
+- 📂 Organized data storage structure
 
 ## 🚀 Getting Started
 
@@ -64,6 +66,11 @@ A versatile AI chat interface supporting multiple language models, featuring rea
    CORS_ORIGIN=http://localhost:5173
    ```
 
+5. Create the database directory:
+   ```bash
+   mkdir database
+   ```
+
 ## 💻 Usage
 
 1. Start the backend server:
@@ -89,20 +96,29 @@ A versatile AI chat interface supporting multiple language models, featuring rea
 
 ```
 .
-├── frontend/                 # React + TypeScript frontend
+├── frontend/                # React + TypeScript frontend
 │   ├── src/
-│   │   ├── components/      # Reusable UI components
-│   │   ├── pages/          # Page components
-│   │   ├── types/          # TypeScript type definitions
-│   │   └── App.tsx         # Main application component
-│   ├── tailwind.config.js   # Tailwind CSS configuration
-│   └── package.json        # Frontend dependencies
+│   │   ├── components/     # Reusable UI components
+│   │   ├── pages/         # Page components
+│   │   ├── types/         # TypeScript type definitions
+│   │   └── App.tsx        # Main application component
+│   ├── tailwind.config.js  # Tailwind CSS configuration
+│   └── package.json       # Frontend dependencies
 │
-└── backend/                 # Node.js + Express backend
-    ├── src/
-    │   ├── config.ts       # Configuration management
-    │   └── index.ts        # Main server file
-    └── package.json        # Backend dependencies
+├── backend/                # Node.js + Express backend
+│   ├── src/
+│   │   ├── config/        # Configuration management
+│   │   ├── controllers/   # Request handlers
+│   │   ├── middlewares/   # Express middlewares
+│   │   ├── routes/        # API routes
+│   │   ├── services/      # Business logic
+│   │   └── types/         # TypeScript type definitions
+│   └── package.json       # Backend dependencies
+│
+└── database/              # Persistent data storage
+    ├── chats.json        # Chat history
+    ├── documents.json    # Uploaded documents
+    └── config.json       # Application configuration
 ```
 
 ## 🛠️ Tech Stack
@@ -119,8 +135,13 @@ A versatile AI chat interface supporting multiple language models, featuring rea
 - Node.js
 - Express
 - TypeScript
-- Multer
+- Multer (file uploads)
 - Support for multiple AI model providers
+
+### Data Storage
+- JSON-based persistent storage
+- UTF-8 encoded file names and content
+- Organized database structure
 
 ## 🤝 Contributing
 
