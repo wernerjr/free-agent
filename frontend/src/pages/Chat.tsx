@@ -164,13 +164,14 @@ export function Chat({ currentChatId, onChatUpdated }: ChatProps) {
             return newMessages;
           });
         } else if (data.type === 'done') {
-          // No need to update content here since we already have it
-          // Just update the timestamp and other metadata
+          // Update the message with all metadata from the server
           setMessages(prev => {
             const newMessages = [...prev];
             const lastMessage = newMessages[newMessages.length - 1];
             if (lastMessage.role === 'assistant') {
               lastMessage.timestamp = new Date(data.message.timestamp);
+              lastMessage.model = data.message.model;
+              lastMessage.responseTime = data.message.responseTime;
             }
             return newMessages;
           });

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { ConfigManager } from '../config/config';
+import { ChatService } from '../services/chat.service';
 
 export class ConfigController {
   private static instance: ConfigController;
@@ -120,6 +121,9 @@ export class ConfigController {
 
       console.log('Setting new model:', model);
       this.configManager.setModel(model);
+      
+      // Clear ChatService instance to force a refresh with the new model
+      ChatService.clearInstance();
       
       console.log('Model updated successfully');
       res.json({ 
