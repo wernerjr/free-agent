@@ -119,14 +119,19 @@ ${message}
       },
       'microsoft/phi-2': {
         ...baseConfig,
-        inputs: `You are a helpful AI assistant. When providing code examples, always use markdown code blocks with the appropriate language tag.
+        parameters: {
+          ...baseConfig.parameters,
+          max_new_tokens: Math.min(512, max_new_tokens),
+          temperature: 0.8,
+          top_p: 0.9,
+          repetition_penalty: 1.2
+        },
+        inputs: `Human: You are a helpful AI assistant. Be concise and clear in your responses.
 
-Previous conversation:
+${truncatedHistory ? `Chat history:
 ${truncatedHistory}
 
-Instructions: ${message}
-
-Response (remember to use markdown code blocks for any code):`
+` : ''}Question: ${message}`
       }
     };
 
